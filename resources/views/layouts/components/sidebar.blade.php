@@ -83,6 +83,21 @@
               </li>
               <li class="{{request()->is('portal/asesments/list*') ? 'active' : ''}}"><a class="nav-link" href="{{route('mhs.asesment.list')}}"><i class="fas fa-chart-line"></i> <span>Self Asesment</span></a></li>
             @endrole
+              <form id="logoutForm" action="{{route('logout')}}" method="POST">
+                @csrf
+                <li class="#"><a id="logoutLink" class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+              </form>
           </ul>    
         </aside>
     </div>
+
+    @push('js')
+        <script>
+            document.getElementById('logoutLink').addEventListener('click', function(event) {
+                event.preventDefault(); // Menghentikan link untuk berpindah ke URL yang ditentukan
+
+                // Men-submit form saat link diklik
+                document.getElementById('logoutForm').submit();
+            });
+        </script>
+    @endpush    

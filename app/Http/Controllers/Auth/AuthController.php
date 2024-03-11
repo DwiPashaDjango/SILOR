@@ -32,6 +32,10 @@ class AuthController extends Controller
         $request->validate([
             'username' =>'required',
             'password' => 'required|min:8'
+        ], [
+            'username.required' => 'Masukan Nim/Nip',
+            'password.required' => 'Masukan Password',
+            'password.min' => 'Minimal Password 8 Huruf/Angka',
         ]);
 
         $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();
@@ -46,7 +50,7 @@ class AuthController extends Controller
                     return redirect()->route('dashboard');
                 }
             } else {
-                return back()->with(['message' => 'Nim/Nidn Atau Password Salah.']);
+                return back()->with(['message' => 'Nim/Nip Atau Password Salah.']);
             }
         } else {
             return back()->with(['message' => 'Akun Tidak Terdaftar.']);

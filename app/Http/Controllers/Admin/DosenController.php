@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\DosenImport;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -43,6 +44,7 @@ class DosenController extends Controller
                                 Pilih
                             </button>
                             <div class="dropdown-menu">
+                                <a class="dropdown-item" href="javascript:void(0)" data-id="'.$row->id.'" id="reset">Reset Password</a>
                                 <a class="dropdown-item" href="javascript:void(0)" data-id="'.$row->id.'" id="edit">Edit</a>
                                 <a class="dropdown-item" href="javascript:void(0)" data-id="'.$row->id.'" id="delete">Hapus</a>
                             </div>
@@ -147,6 +149,24 @@ class DosenController extends Controller
     {
         $data = User::find($id);
         $data->delete();
+        return response()->json(200);
+    }
+
+    public function update_pw(Request $request, $id_password)
+    {
+        $__rules = Validator::make($request->all(),[
+            'password' => 'required|min:8|confirmed',
+            'password_confirmation' => 'required|min:8'
+        ]);
+
+        if ($__rules->fails()) {
+            return response()->json(['errors' => $__rules->errors()], 422);
+        }
+
+        $data = User::find($id_password);
+        $data->update([
+            'password' => Hash::make($request->password)
+        ]);
         return response()->json(200);
     }
 }

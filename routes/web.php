@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MatkulController;
 use App\Http\Controllers\Admin\NilaiMhsController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPassword;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Dosen\AsesmentDosenController;
 use App\Http\Controllers\Dosen\JurnalShowController;
@@ -46,12 +47,14 @@ Route::group(['middleware' => ['auth', 'role:Admin']], function() {
         Route::get('/dosens/{id}', [DosenController::class, 'edit'])->name('dosens.edit');
         Route::put('/dosens/{id}', [DosenController::class, 'update'])->name('dosens.update');
         Route::delete('/dosens/{id}', [DosenController::class, 'destroy'])->name('dosens.delete');
+        Route::put('/dosens/update-pw/{id_password}', [MahasiswaController::class, 'update_pw'])->name('mhs.update_pw');
 
         Route::get('/mahasiswas', [MahasiswaController::class, 'index'])->name('mhs');
         Route::post('/mahasiswas/import', [MahasiswaController::class, 'import'])->name('mhs.import');
         Route::get('/mahasiswas/{id}', [MahasiswaController::class, 'edit'])->name('mhs.edit');
         Route::put('/mahasiswas/{id}', [MahasiswaController::class, 'update'])->name('mhs.update');
         Route::delete('/mahasiswas/{id}', [MahasiswaController::class, 'destroy'])->name('mhs.delete');
+        Route::put('/mahasiswas/update-pw/{id_password}', [MahasiswaController::class, 'update_pw'])->name('mhs.update_pw');
 
         Route::get('/matkuls', [MatkulController::class, 'index'])->name('matkuls');
         Route::get('/matkuls/create', [MatkulController::class, 'create'])->name('matkuls.create');
@@ -162,5 +165,14 @@ Route::group(['middleware' => ['auth', 'role:Mahasiswa']], function() {
             Route::get('/list/show/{slug}', [AsesmentShowController::class, 'show'])->name('mhs.asesments.show');
             Route::post('/store/asesments', [AsesmentShowController::class, 'storeAsesment'])->name('mhs.save.asesment');
         });
+    });
+});
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::prefix('reset')->group(function() {
+        Route::get('/confirmation', [ForgotPassword::class, 'index'])->name('reset.index');
+        Route::post('/create-token', [ForgotPassword::class, 'forgot'])->name('reset.forgot');
+        Route::get('/new-password/{token}', [ForgotPassword::class, 'reset'])->name('reset.new');
+        Route::post('/save-password', [ForgotPassword::class, 'newPassword'])->name('reset.save');
     });
 });

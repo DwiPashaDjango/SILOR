@@ -53,7 +53,7 @@
             </div>
             <div class="card-body">
                <div class="table-responsive">
-                   <table class="table table-bodered table-striped text-center" id="table" style="width: 100%">
+                   <table class="table table-bodered table-striped text-center" id="table2" style="width: 100%">
                        <thead class="bg-primary">
                            <tr>
                                <th class="text-white text-center">#</th>
@@ -62,7 +62,7 @@
                            </tr>
                        </thead>
                        <tbody>
-                        @forelse ($mhs as $item)
+                        {{-- @forelse ($mhs as $item)
                             <tr>
                                 <td>
                                     <input type="checkbox" name="users_id[]" id="users_id" value="{{$item->id}}">
@@ -78,11 +78,10 @@
                             <tr>
                                 <td colspan="3">Tidak Ada Data Mahasiswa</td>
                             </tr>
-                        @endforelse
+                        @endforelse --}}
                        </tbody>
                    </table>
                </div>
-               {{$mhs->links()}}
             </div>
         </div>
     </form>
@@ -131,11 +130,31 @@
         $(document).ready(function() {
             let table = $("#table").DataTable({
                 serverSide: true,
-                ajax: "{{url('/admin/semesters/' . $data->id)}}",
+                ajax: {
+                    url: "{{url('/admin/semesters/' . $data->id)}}",
+                    data: {
+                        type: 'one'
+                    }
+                },
                 columns: [
                     {data: 'nim'},
                     {data: 'name'},
                     {data: 'action'},
+                ]
+            });
+
+            let table2 = $("#table2").DataTable({
+                serverSide: true,
+                ajax: {
+                    url: "{{url('/admin/semesters/' . $data->id)}}",
+                    data: {
+                        type: 'two'
+                    }
+                },
+                columns: [
+                    {data: 'action'},
+                    {data: 'nim'},
+                    {data: 'name'},
                 ]
             });
 

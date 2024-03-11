@@ -71,21 +71,45 @@ class SemesterController extends Controller
                     ->paginate(10);
         $semesters = Semester::all();
         if (request()->ajax()) {
-            $relation = PivotSemester::with('user')->where('semesters_id', $id);
-            return DataTables::of($relation)
-            ->addColumn('nim', function($row) {
-                return $row->user->username;
-            })
-            ->addColumn('name', function($row) {
-                return $row->user->name;
-            })
-            ->addColumn('action', function($row) {
-                $btn = '<a href="javascript:void(0)" data-id="'.$row->id.'" id="enroll" class="btn btn-warning btn-sm mr-2"><i class="fas fa-exchange-alt"></i></a>';
-                return $btn;
-            })
-            ->rawColumns(['action'])
-            ->addIndexColumn()
-            ->toJson();
+            $type = request('type');
+
+            if ($type === 'one') {
+                $relation = PivotSemester::with('user')->where('semesters_id', $id);
+                return DataTables::of($relation)
+                ->addColumn('nim', function($row) {
+                    return $row->user->username;
+                })
+                ->addColumn('name', function($row) {
+                    return $row->user->name;
+                })
+                ->addColumn('action', function($row) {
+                    $btn = '<a href="javascript:void(0)" data-id="'.$row->id.'" id="enroll" class="btn btn-warning btn-sm mr-2"><i class="fas fa-exchange-alt"></i></a>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->addIndexColumn()
+                ->toJson();
+            } elseif($type === 'two') {
+                $mhs = User::doesntHave('semester')
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', 'Mahasiswa');
+                    })
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                return DataTables::of($mhs)
+                ->addColumn('action', function($row) {
+                    $act = '<input type="checkbox" name="users_id[]" id="users_id" value="'.$row->id.'">';
+                    return $act;
+                })
+                ->addColumn('nim', function($row) {
+                    return $row->username;
+                })
+                ->addColumn('name', function($row) {
+                    return $row->name;
+                })
+                ->rawColumns(['action'])
+                ->toJson();
+            }
         }
         return view('admin.semester.show', compact('data', 'mhs', 'semesters'));
     }

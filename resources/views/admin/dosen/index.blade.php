@@ -105,6 +105,38 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resetModalLabel"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="">
+            <input type="hidden" name="id_password" id="id_password">
+            <div class="form-group mb-3">
+                <label for="">New Password</label>
+                <input type="password" name="password" id="password" class="form-control">
+                <span class="errors_password text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label for="">Confirmation Password</label>
+                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control">
+                <span class="errors_password_confirmation text-danger"></span>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" id="update_pw" class="btn btn-primary">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
 @endpush
 
 @push('js')
@@ -128,6 +160,78 @@
             $("#import").click(function(e) {
                 e.preventDefault();
                 $("#importModal").modal('show');
+            });
+
+            $(document).on('click', '#reset', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                $.ajax({
+                    url: "{{url('/admin/dosens/')}}/" + id,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
+                        $("#resetModal").modal('show');
+                        $("#resetModalLabel").html(res.name);
+
+                        $("#id_password").val(res.id)
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                })
+            });
+
+            $("#update_pw").click(function(e) {
+                e.preventDefault();
+                const id_password = $("#id_password").val();
+                let datas = {
+                    password: $("#password").val(),
+                    password_confirmation: $("#password_confirmation").val(),
+                }
+
+                $.ajax({
+                    url: "{{url('/admin/dosens/update-pw')}}/" + id_password,
+                    method: 'PUT',
+                    data: datas,
+                    dataType: 'json',
+                    success: function(data) {
+                        let timerInterval;
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil..",
+                            html: "Data akan di update dalam <b></b> milliseconds.",
+                            timer: 2000,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getPopup().querySelector("b");
+                                timerInterval = setInterval(() => {
+                                timer.textContent = `${Swal.getTimerLeft()}`;
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                                table.draw();
+                                $("#resetModal").modal('hide');
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                table.draw();
+                                $("#resetModal").modal('hide');
+                            }
+                        });
+                    },
+                    error: function(err) {
+                        $.each(err.responseJSON.errors, function(index, value) {
+                            $("#" + index).addClass('is-invalid');
+                            $(".errors_" + index).html(value);
+                            setTimeout(() => {
+                                $("#" + index).removeClass('is-invalid');
+                                $(".errors_" + index).html('');
+                            }, 3000);
+                        })
+                    }
+                })
             });
 
             $(document).on('click', '#edit', function(e) {
